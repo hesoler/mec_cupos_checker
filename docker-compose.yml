@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./cookies.json:/app/cookies.json
+      - ./state.json:/app/state.json
+    command: python main.py
