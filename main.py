@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 from api import crear_session, consultar_disponibilidades, cookies_validas
 from auth import cargar_cookies
-from notifier import enviar_mail, enviar_telegram
-from utils import obtener_primera_fecha, cargar_estado, guardar_estado
+from notifier import enviar_telegram
+from utils import obtener_tramite_ultima_fecha, cargar_estado, guardar_estado
 
 load_dotenv()
 
@@ -17,6 +17,7 @@ logging.basicConfig(
 )
 
 MAX_REINTENTOS = 3
+
 
 # DEVUELVE UNA LISTA DE ENTEROS CON LOS ID DE RECURSOS A CONSULTAR
 def obtener_recursos_env():
@@ -39,26 +40,33 @@ def manejar_cookies():
     return session
 
 
-def procesar_disponibilidades(session, estado, recurso):
+def procesar_disponibilidades(session, estado, recurso: int):
+    nombre_tramite = estado.get("nombre_tramite")
+    id_agenda = int(os.getenv("ID_AGENDA"))
+    check_timeout = int(os.getenv("CHECK_TIMEOUT"))
+    token = str(os.getenv("TOKEN_DISPONIBILIDADES"))
+
     data = consultar_disponibilidades(
-        session, int(recurso), int(os.getenv("CHECK_TIMEOUT"))
+        session, token, recurso, id_agenda, check_timeout
     )
-    fecha = obtener_primera_fecha(data)
-    if fecha and fecha != estado.get("ultima_fecha_notificada"):
+
+    lista_datos_tramites = obtener_tramite_ultima_fecha(data)
+
+    if lista_datos_tramites and lista_datos_tramites != estado["ultima_fecha_notificada"]:
         mensaje = (
-            f"✅ Cupos disponibles\n\n"
-            f"📍 Recurso: `{recurso}`\n"
-            f"📍 Trámite: `{recurso}`\n"
-            f"📅 Fecha más próxima detectada: {fecha}\n\n"
+            f"✅ *Cupos disponibles*\n\n"
+            f"🧾 Trámite: *{nombre_tramite or 'Desconocido'}*\n"
+            f"📍 Recurso: `{os.getenv('ID_RECURSO')}`\n"
+            f"📅 Fecha más próxima: *{lista_datos_tramites}*\n\n"
             f"Ingresá al sistema para reservar."
         )
+
         enviar_telegram(
             os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID"), mensaje
         )
-        enviar_mail(os.getenv("GMAIL_USER"), os.getenv("GMAIL_APP_PASSWORD"), mensaje)
-        guardar_estado(fecha)
-        logging.info(f"Cupos detectados para {recurso}: {fecha}")
-    elif fecha:
+        guardar_estado(lista_datos_tramites)
+        logging.info(f"Cupos detectados para {recurso}: {lista_datos_tramites}")
+    elif lista_datos_tramites:
         logging.info(f"Cupos ya notificados previamente para {recurso}")
     else:
         logging.info(f"No hay cupos disponibles para {recurso}")
