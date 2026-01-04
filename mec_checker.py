@@ -1,8 +1,10 @@
 import logging
 import os
+import time
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
+from ai_agent import consultar_agente_ia_groq
 from notifier import enviar_telegram
 from utils import cargar_estado, guardar_estado
 
@@ -84,51 +86,99 @@ class MECChecker:
         except Exception:
             return False
 
+    def _safe_goto(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000, retries: int = 3,
+                   backoff: float = 1.5):
+        """
+        Ir a una URL con reintentos cuando Playwright lanza TimeoutError u otros errores transitorios.
+        """
+        last_exc = None
+        for attempt in range(1, retries + 1):
+            try:
+                logging.info(f"Navegando a {url} (intento {attempt}/{retries}, timeout={timeout}ms)")
+                self.page.goto(url, wait_until=wait_until, timeout=timeout)
+                return
+            except PlaywrightError as e:
+                last_exc = e
+                logging.warning(f"Navegación fallida en intento {attempt}: {e}")
+                if attempt < retries:
+                    sleep_time = backoff * attempt
+                    logging.info(f"Esperando {sleep_time}s antes de reintentar...")
+                    time.sleep(sleep_time)
+        # si llegamos aquí, no hubo éxito
+        logging.error(f"No se pudo navegar a {url} después de {retries} intentos")
+        raise last_exc
+
     def ensure_login(self):
         logging.info("🔎 Verificando sesión...")
 
-        self.page.goto(
-            "https://bpmgob.mec.gub.uy/",
-            wait_until="networkidle"
-        )
+        # Intentar con un timeout mayor y reintentos
+        try:
+            self._safe_goto(
+                "https://bpmgob.mec.gub.uy/",
+                wait_until="domcontentloaded",
+                timeout=10000,
+                retries=3,
+                backoff=2
+            )
+        except Exception as e:
+            logging.error(f"Error al cargar la página principal: {e}")
+            raise
 
         if self.esta_logueado():
             logging.info("✅ Sesión válida")
             return
 
         logging.info("🔐 Sesión no válida, esperando login automático...")
-        self.page.goto("https://bpmgob.mec.gub.uy/autenticacion/login")
-
-        self.page.wait_for_function(
-            "() => document.querySelector('#userMenu') && "
-            "!document.querySelector('#userMenu').innerText.toLowerCase().includes('iniciar')",
-            timeout=0
-        )
+        # Ir a la página de login con reintentos
+        try:
+            self._safe_goto(
+                "https://bpmgob.mec.gub.uy/autenticacion/login",
+                wait_until="domcontentloaded",
+                timeout=60000,
+                retries=3,
+                backoff=2
+            )
+        except Exception as e:
+            logging.error(f"Error al cargar la página de login: {e}")
+            raise
 
         if self.esta_logueado():
             logging.info("✅ Sesión válida")
             return
 
-        self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=0)
+        logging.info("Esperando redirección al proveedor de identidad...")
+        try:
+            # Esperar redirección a iduruguay (timeout=0 = sin timeout, pero lo reemplazamos con reintentos)
+            self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=8000)
+        except PlaywrightError:
+            logging.warning("Timeout esperando redirección a iduruguay; continuando de todos modos")
 
-        self.page.click("button[aria-label='Usuario Gub.uy']")
-        self.page.wait_for_selector(
-            "a[aria-label='No tengo documento uruguayo']", timeout=5000
-        )
-        self.page.click("a[aria-label='No tengo documento uruguayo']")
-        self.page.wait_for_selector("select#pais_emisor", timeout=2000)
-        self.page.select_option("select#pais_emisor", "Cuba")
-        self.page.select_option("select#tipo_documento", "Pasaporte")
+        try:
+            self.page.click("button[aria-label='Usuario Gub.uy']")
+            self.page.wait_for_selector(
+                "a[aria-label='No tengo documento uruguayo']", timeout=5000
+            )
+            self.page.click("a[aria-label='No tengo documento uruguayo']")
+            self.page.wait_for_selector("select#pais_emisor", timeout=2000)
+            self.page.select_option("select#pais_emisor", "Cuba")
+            self.page.select_option("select#tipo_documento", "Pasaporte")
 
-        self.page.fill("input#username", os.getenv("MEC_USER"))
-        self.page.click("button[type='submit']")
+            self.page.fill("input#username", os.getenv("MEC_USER"))
+            self.page.click("button[type='submit']")
 
-        self.page.wait_for_selector("input#password", timeout=2000)
-        self.page.fill("input#password", os.getenv("MEC_PASSWORD"))
-        self.page.click("button[type='submit']")
+            self.page.wait_for_selector("input#password", timeout=2000)
+            self.page.fill("input#password", os.getenv("MEC_PASSWORD"))
+            self.page.click("button[type='submit']")
 
-        # Esperar retorno al MEC
-        self.page.wait_for_url("**bpmgob.mec.gub.uy/**", timeout=0)
+            # Esperar retorno al MEC
+            try:
+                self.page.wait_for_url("**bpmgob.mec.gub.uy/**", timeout=120000)
+            except PlaywrightError:
+                logging.warning("Timeout esperando retorno al MEC; continuando de todos modos")
+
+        except PlaywrightError as e:
+            logging.error(f"Error durante el flujo de login interactivo: {e}")
+            raise
 
         logging.info("✅ Login completado")
 
@@ -149,14 +199,16 @@ class MECChecker:
         pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text()
         logging.info(f"❓ Pregunta de seguridad: {pregunta}")
 
-        self.page.pause()
+        # Integrar agente IA para responder la pregunta de seguridad
+        agent_response = consultar_agente_ia_groq(pregunta)
+        logging.info(f"🤖 Respuesta del agente: {agent_response}")
 
-        # TODO: Integrar agente IA para responder la pregunta de seguridad
-        # self.page.fill("div.controls > input[name='pregunta']", agent_response)
-        # self.page.click("button[type='submit']")
+        self.page.fill("div.controls > input[name='pregunta']", agent_response)
+        self.page.click("button#btn_siguiente_ciudadano[type='submit']")
 
+        self.page.click("div.radio input[type='radio']", timeout=2000)
         # Esperar a que el JS haga sus llamadas para obtener las disponibilidades
-        self.page.wait_for_timeout(5000)
+        self.page.wait_for_timeout(2000)
 
         return self.datos
 

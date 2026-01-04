@@ -9,7 +9,7 @@ load_dotenv()
 if __name__ == "__main__":
     checker = MECChecker(
         etapa_id=int(os.getenv("ID_ETAPA")),
-        headless=False
+        headless=True
     )
 
     try:
