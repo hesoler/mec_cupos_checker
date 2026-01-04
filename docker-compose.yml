@@ -6,4 +6,4 @@ services:
     volumes:
       - ./state.json:/app/state.json
       - ./storage_state.json:/app/storage_state.json
-    command: python main.py
+      - ./mec_cupos_checker.log:/var/log/mec_cupos_checker.log

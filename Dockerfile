@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libu2f-udev \
     libvulkan1 \
+    cron \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,3 +33,10 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && playwright install chromium
 
 COPY . .
+
+# Copiar entrypoint para manejar export de env y cron
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/bin/bash"]
