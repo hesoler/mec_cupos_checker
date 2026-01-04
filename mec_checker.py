@@ -144,17 +144,18 @@ class MECChecker:
             timeout=0
         )
 
+        # Obtener la pregunta de seguridad
         self.page.wait_for_selector("div.controls > input[type='text']~label", timeout=2000)
+        pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text()
+        logging.info(f"❓ Pregunta de seguridad: {pregunta}")
+
         self.page.pause()
-        # self.page.wait_for_selector("div.controls > input[name='pregunta']")
 
-        self.page.goto(
-            f"https://bpmgob.mec.gub.uy/etapas/ejecutar/{self.etapa_id}/1",
-            wait_until="networkidle",
-            timeout=0
-        )
+        # TODO: Integrar agente IA para responder la pregunta de seguridad
+        # self.page.fill("div.controls > input[name='pregunta']", agent_response)
+        # self.page.click("button[type='submit']")
 
-        # Esperar a que el JS haga sus llamadas
+        # Esperar a que el JS haga sus llamadas para obtener las disponibilidades
         self.page.wait_for_timeout(5000)
 
         return self.datos
