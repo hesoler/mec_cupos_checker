@@ -12,8 +12,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 
 
 class MECChecker:
-    def __init__(self, etapa_id: int, headless: bool = True):
-        self.etapa_id = etapa_id
+    def __init__(self, headless: bool = True):
         self.headless = headless
         self.playwright = None
         self.browser = None
@@ -185,11 +184,11 @@ class MECChecker:
     # -------------------------
     # Lógica principal
     # -------------------------
-    def check_tramite(self):
+    def check_tramite(self, etapa_id: int):
         logging.info("📅 Comprobando disponibilidades del trámite...")
 
         self.page.goto(
-            f"https://bpmgob.mec.gub.uy/etapas/ejecutar/{self.etapa_id}/0",
+            f"https://bpmgob.mec.gub.uy/etapas/ejecutar/{etapa_id}/0",
             wait_until="networkidle",
             timeout=0
         )

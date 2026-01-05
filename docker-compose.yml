@@ -4,6 +4,6 @@ services:
     env_file:
       - .env
     volumes:
-      - ./state.json:/app/state.json
+      - ./available.json:/app/available.json
       - ./storage_state.json:/app/storage_state.json
       - ./mec_cupos_checker.log:/var/log/mec_cupos_checker.log

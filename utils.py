@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-STATE_FILE = Path("state.json")
+STATE_FILE = Path("available.json")
 
 
 def cargar_estado():
