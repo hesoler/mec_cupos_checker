@@ -32,7 +32,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
     && playwright install chromium
 
-COPY . .
+COPY . /app
 
 # Copiar entrypoint para manejar export de env y cron
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

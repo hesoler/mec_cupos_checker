@@ -1,9 +1,10 @@
 services:
   app:
     build: .
+    container_name: mec_checker
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
       - ./available.json:/app/available.json
       - ./storage_state.json:/app/storage_state.json
-      - ./mec_cupos_checker.log:/var/log/mec_cupos_checker.log
