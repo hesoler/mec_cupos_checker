@@ -85,7 +85,7 @@ class MECChecker:
         except Exception:
             return False
 
-    def _safe_goto(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000, retries: int = 3,
+    def _safe_goto(self, url: str, wait_until: str = "networkidle", timeout: int = 30000, retries: int = 3,
                    backoff: float = 1.5):
         """
         Ir a una URL con reintentos cuando Playwright lanza TimeoutError u otros errores transitorios.
@@ -114,7 +114,7 @@ class MECChecker:
         try:
             self._safe_goto(
                 "https://bpmgob.mec.gub.uy/",
-                wait_until="domcontentloaded",
+                wait_until="networkidle",
                 timeout=10000,
                 retries=3,
                 backoff=2
@@ -132,7 +132,7 @@ class MECChecker:
         try:
             self._safe_goto(
                 "https://bpmgob.mec.gub.uy/autenticacion/login",
-                wait_until="domcontentloaded",
+                wait_until="networkidle",
                 timeout=60000,
                 retries=3,
                 backoff=2
