@@ -148,7 +148,7 @@ class MECChecker:
         logging.info("Esperando redirección al proveedor de identidad...")
         try:
             # Esperar redirección a iduruguay (timeout=0 = sin timeout, pero lo reemplazamos con reintentos)
-            self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=8000)
+            self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=0)
         except PlaywrightError:
             logging.warning("Timeout esperando redirección a iduruguay; continuando de todos modos")
 
