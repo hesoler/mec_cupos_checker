@@ -131,6 +131,17 @@ python main.py
 
 ### Run with Docker (Scheduled Checks)
 
+This project includes an `entrypoint.sh` that sets up a cron job that runs `python main.py` every 30 minutes
+(expression `*/30 * * * *`).
+
+How it works:
+
+- `Dockerfile` installs `cron` and copies `entrypoint.sh`.
+- `entrypoint.sh` generates `/etc/envcron` with environment variables (read from `/app/.env` if it exists, or from the
+  container environment) and registers a `crontab` that executes `python main.py` every 30 minutes, redirecting logs to
+  `/var/log/mec_cupos_checker.log`.
+- The container starts `cron` in the foreground so Docker keeps it alive.
+
 The Docker container runs the checker every 30 minutes automatically:
 
 ```bash
@@ -146,6 +157,12 @@ docker exec mec_checker tail -f /var/log/mec_cupos_checker.log
 # Stop the service
 docker compose down
 ```
+
+Notes:
+
+- If you need to change the frequency, modify the `CRON_JOB` variable inside `entrypoint.sh`.
+- In production environments you can also schedule using host cron/systemd timer instead of using cron inside the
+  container.
 
 ### Run Once in Docker (Debugging)
 
