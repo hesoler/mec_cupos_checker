@@ -100,7 +100,7 @@ TELEGRAM_CHAT_ID=your_chat_id
 GROQ_API_KEY=your_groq_api_key
 
 # Optional: Disable cron (run once and exit)
-# CRON_DISABLED=true
+CRON_DISABLED=true
 ```
 
 ### Getting Configuration Values
@@ -150,6 +150,12 @@ docker compose up -d
 
 # View logs
 docker compose logs -f app
+
+# Verify that the cron job has the correct path
+docker exec mec_checker crontab -l
+
+# Verify the exported environment variables
+docker exec mec_checker cat /etc/envcron
 
 # View detailed execution logs
 docker exec mec_checker tail -f /var/log/mec_cupos_checker.log
