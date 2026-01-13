@@ -5,7 +5,7 @@ import time
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 from ai_agent import consultar_agente_ia_groq
-from notifier import enviar_telegram
+from notifier import send_telegram
 from utils import cargar_estado, guardar_estado
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -147,8 +147,8 @@ class MECChecker:
 
         logging.info("Esperando redirección al proveedor de identidad...")
         try:
-            # Esperar redirección a iduruguay (timeout=0 = sin timeout, pero lo reemplazamos con reintentos)
-            self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=0)
+            # Esperar redirección a iduruguay
+            self.page.wait_for_url("**iduruguay.gub.uy/**", timeout=5000)
         except PlaywrightError:
             logging.warning("Timeout esperando redirección a iduruguay; continuando de todos modos")
 
@@ -187,10 +187,16 @@ class MECChecker:
     def check_tramite(self, etapa_id: int):
         logging.info("📅 Comprobando disponibilidades del trámite...")
 
+        # Reset datos for each tramite
+        self.datos = {
+            "nombre_tramite": None,
+            "fechas": []
+        }
+
         self.page.goto(
             f"https://bpmgob.mec.gub.uy/etapas/ejecutar/{etapa_id}/0",
             wait_until="networkidle",
-            timeout=0
+            timeout=8000
         )
 
         # Obtener la pregunta de seguridad
@@ -231,7 +237,7 @@ class MECChecker:
             f"Ingresá al sistema para reservar."
         )
 
-        enviar_telegram(
+        send_telegram(
             os.getenv("TELEGRAM_BOT_TOKEN"),
             os.getenv("TELEGRAM_CHAT_ID"),
             mensaje
