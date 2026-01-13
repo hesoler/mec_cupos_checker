@@ -203,9 +203,9 @@ class MECChecker:
         logging.info(f"🤖 Respuesta del agente: {agent_response}")
 
         self.page.fill("div.controls > input[name='pregunta']", agent_response)
-        self.page.click("button#btn_siguiente_ciudadano[type='submit']")
+        self.page.click("button#btn_siguiente_ciudadano[type='submit']", timeout=2000)
 
-        self.page.click("div.radio input[type='radio']", timeout=2000)
+        self.page.click("div.radio input[type='radio']")
         # Esperar a que el JS haga sus llamadas para obtener las disponibilidades
         self.page.wait_for_timeout(2000)
 
