@@ -101,6 +101,9 @@ GROQ_API_KEY=your_groq_api_key
 
 # Optional: Disable cron (run once and exit)
 CRON_DISABLED=true
+
+# Execution interval in minutes
+CRON_JOB_TIMER_MINUTES=30
 ```
 
 ### Getting Configuration Values
