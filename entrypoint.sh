@@ -8,8 +8,7 @@ ENV_FILE="/app/.env"
 ENV_CRON_FILE="/etc/envcron"
 LOG_FILE="/var/log/mec_cupos_checker.log"
 PYTHON_PATH=$(which python || which python3)
-# Run every 30 minutes
-CRON_JOB="*/30 * * * * . ${ENV_CRON_FILE} && cd /app && ${PYTHON_PATH} main.py >> ${LOG_FILE} 2>&1"
+CRON_JOB="*/${CRON_JOB_TIMER_MINUTES} * * * * . ${ENV_CRON_FILE} && cd /app && ${PYTHON_PATH} main.py >> ${LOG_FILE} 2>&1"
 
 # Function to create log file and directories
 create_log_file() {
