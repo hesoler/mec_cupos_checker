@@ -5,8 +5,7 @@ import time
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 from ai_agent import consultar_agente_ia_groq
-from notifier import send_telegram
-from utils import cargar_estado, guardar_estado
+from utils import cargar_estado, guardar_estado, get_mec_credentials, send_notification_message
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
@@ -169,11 +168,12 @@ class MECChecker:
             self.page.select_option("select#pais_emisor", "Cuba")
             self.page.select_option("select#tipo_documento", "Pasaporte")
 
-            self.page.fill("input#username", os.getenv("MEC_USER"))
+            mec_credentials = get_mec_credentials()
+            self.page.fill("input#username", mec_credentials["username"])
             self.page.click("button[type='submit']")
 
             self.page.wait_for_selector("input#password", timeout=2000)
-            self.page.fill("input#password", os.getenv("MEC_PASSWORD"))
+            self.page.fill("input#password", mec_credentials["password"])
             self.page.click("button[type='submit']")
 
             # Esperar retorno al MEC
@@ -242,18 +242,13 @@ class MECChecker:
             logging.info("ℹ️ Cupos ya notificados anteriormente")
             return
 
-        mensaje = (
+        message = (
             f"✅ *Cupos disponibles*\n\n"
             f"📄 Trámite: *{nombre_tramite}*\n"
             f"📅 Fecha más próxima: *{fecha_fmt}*\n\n"
             f"Ingresá al sistema para reservar."
         )
 
-        send_telegram(
-            os.getenv("TELEGRAM_BOT_TOKEN"),
-            os.getenv("TELEGRAM_CHAT_ID"),
-            mensaje
-        )
-
+        send_notification_message(message)
         guardar_estado(data)
         logging.info("📣 Notificación enviada")
