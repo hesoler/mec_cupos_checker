@@ -222,9 +222,13 @@ class MECChecker:
             logging.info("❌ No hay cupos disponibles")
             return
 
+        print(self.datos)
+        tramite = self.datos["nombre_tramite"][0] | self.datos["tramite"][0] | self.datos["tramite_id"][0]
         self.datos["fechas"].sort()
         fecha = self.datos["fechas"][0]
         fecha_fmt = f"{fecha[6:8]}/{fecha[4:6]}/{fecha[0:4]}"
+
+        data = {"tramite": tramite, "fecha": fecha_fmt}
 
         if fecha == self.estado.get("ultima_fecha_notificada"):
             logging.info("ℹ️ Cupos ya notificados anteriormente")
@@ -232,7 +236,7 @@ class MECChecker:
 
         mensaje = (
             f"✅ *Cupos disponibles*\n\n"
-            f"📄 Trámite: *{self.datos['nombre_tramite']}*\n"
+            f"📄 Trámite: *{tramite}*\n"
             f"📅 Fecha más próxima: *{fecha_fmt}*\n\n"
             f"Ingresá al sistema para reservar."
         )
@@ -243,5 +247,5 @@ class MECChecker:
             mensaje
         )
 
-        guardar_estado(fecha)
+        guardar_estado(data)
         logging.info("📣 Notificación enviada")

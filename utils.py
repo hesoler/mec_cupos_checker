@@ -17,7 +17,7 @@ def cargar_estado():
         return {"ultima_fecha_notificada": None, "nombre_tramite": None}
 
 
-def guardar_estado(fecha):
+def guardar_estado(data):
     STATE_FILE.write_text(
-        json.dumps({"ultima_fecha_notificada": fecha}, indent=2)
+        json.dumps({"ultima_fecha_notificada": data.fecha, "tramite": data.tramite}, indent=2)
     )
