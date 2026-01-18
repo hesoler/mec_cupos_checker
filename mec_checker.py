@@ -56,8 +56,15 @@ class MECChecker:
                 if "agenda_sae_api_recursos" in response.url:
                     data = response.json()
                     recursos = data.get("recursos", [])
-                    if recursos and not self.datos["nombre_tramite"]:
-                        self.datos["nombre_tramite"] = recursos[0].get("nombre")
+
+                    for r in recursos:
+                        if not self.id_recurso_actual:
+                            self.id_recurso_actual = r.get("id_recurso")
+
+                        if r.get("id_recurso") == self.id_recurso_actual:
+                            self.datos["nombre_tramite"] = r.get("nombre")
+                            logging.info(f"📄 Trámite detectado: {self.datos['nombre_tramite']}")
+                            break
 
                 if "agenda_sae_api_disponibilidades" in response.url:
                     data = response.json()
@@ -223,12 +230,13 @@ class MECChecker:
             return
 
         print(self.datos)
-        tramite = self.datos["nombre_tramite"][0] | self.datos["tramite"][0] | self.datos["tramite_id"][0]
+        nombre_tramite = self.datos["nombre_tramite"] or "Trámite desconocido"
+
         self.datos["fechas"].sort()
         fecha = self.datos["fechas"][0]
         fecha_fmt = f"{fecha[6:8]}/{fecha[4:6]}/{fecha[0:4]}"
 
-        data = {"tramite": tramite, "fecha": fecha_fmt}
+        data = {"nombre_tramite": nombre_tramite, "fecha": fecha_fmt}
 
         if fecha == self.estado.get("ultima_fecha_notificada"):
             logging.info("ℹ️ Cupos ya notificados anteriormente")
@@ -236,7 +244,7 @@ class MECChecker:
 
         mensaje = (
             f"✅ *Cupos disponibles*\n\n"
-            f"📄 Trámite: *{tramite}*\n"
+            f"📄 Trámite: *{nombre_tramite}*\n"
             f"📅 Fecha más próxima: *{fecha_fmt}*\n\n"
             f"Ingresá al sistema para reservar."
         )
