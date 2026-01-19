@@ -94,7 +94,7 @@ ETAPAS_IDS=123,456,789
 
 # Telegram Configuration
 TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
+TELEGRAM_CHATBOT_IDS=your_chat_id   # Comma-separated for multiple IDs
 
 # Groq AI API Key
 GROQ_API_KEY=your_groq_api_key

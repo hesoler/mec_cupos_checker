@@ -236,8 +236,6 @@ class MECChecker:
         fecha = self.datos["fechas"][0]
         fecha_fmt = f"{fecha[6:8]}/{fecha[4:6]}/{fecha[0:4]}"
 
-        data = {"nombre_tramite": nombre_tramite, "fecha": fecha_fmt}
-
         if fecha == self.estado.get("ultima_fecha_notificada"):
             logging.info("ℹ️ Cupos ya notificados anteriormente")
             return
@@ -250,5 +248,6 @@ class MECChecker:
         )
 
         send_notification_message(message)
+        data = {"nombre_tramite": nombre_tramite, "fecha": fecha_fmt}
         guardar_estado(data)
         logging.info("📣 Notificación enviada")
