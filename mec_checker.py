@@ -230,7 +230,7 @@ class MECChecker:
             return
 
         print(self.datos)
-        nombre_tramite = self.datos["nombre_tramite"] or "Trámite desconocido"
+        nombre_tramite = self.datos["nombre_tramite"] or "Inscripción de partidas extranjeras"
 
         self.datos["fechas"].sort()
         fecha = self.datos["fechas"][0]
