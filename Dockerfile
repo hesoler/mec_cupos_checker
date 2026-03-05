@@ -29,6 +29,8 @@ WORKDIR /app
 COPY mec_chain.pem /app/mec_chain.pem
 
 COPY requirements.txt .
+RUN sed -i 's/\r//' requirements.txt
+
 RUN pip install --no-cache-dir -r requirements.txt \
     && playwright install chromium
 
@@ -38,6 +40,7 @@ COPY . /app
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+RUN sed -i 's/\r//' /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/bash"]
 EXPOSE 8000

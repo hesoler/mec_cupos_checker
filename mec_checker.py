@@ -198,15 +198,13 @@ class MECChecker:
         )
 
         # Extraer nombre del trámite desde el DOM
-        try:
-            self.datos["nombre_tramite"] = self.page.locator(
-                "#main > div > div > div.span9.contenido-publico > h1"
-            ).inner_text(timeout=2000).strip()
-        except Exception:
-            logging.warning("No se pudo extraer el nombre del trámite desde el DOM")
+        self.datos["nombre_tramite"] = self.page.locator(
+            "#main > div > div > div.span9.contenido-publico > h1"
+        ).inner_text(timeout=2000).strip()
 
         # Obtener la pregunta de seguridad
-        pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text(timeout=2000)
+        self.page.wait_for_selector("div.controls > input[type='text']~label", timeout=2000)
+        pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text()
         logging.info(f"❓ Pregunta de seguridad: {pregunta}")
 
         # Integrar agente IA para responder la pregunta de seguridad
