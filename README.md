@@ -68,6 +68,10 @@ pip install -r requirements.txt
 
 # Install Playwright browsers
 playwright install chromium
+
+# Create json files for state management
+echo "{}" > available.json
+echo "{}" > storage_state.json
 ```
 
 ### Docker Deployment
