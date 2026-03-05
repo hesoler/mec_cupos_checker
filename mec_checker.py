@@ -20,7 +20,8 @@ class MECChecker:
 
         self.datos = {
             "nombre_tramite": None,
-            "fechas": []
+            "fechas": [],
+            "etapa_id": None
         }
 
         self.estado = cargar_estado()
@@ -52,19 +53,6 @@ class MECChecker:
     def _setup_interceptors(self):
         def on_response(response):
             try:
-                if "agenda_sae_api_recursos" in response.url:
-                    data = response.json()
-                    recursos = data.get("recursos", [])
-
-                    for r in recursos:
-                        if not self.id_recurso_actual:
-                            self.id_recurso_actual = r.get("id_recurso")
-
-                        if r.get("id_recurso") == self.id_recurso_actual:
-                            self.datos["nombre_tramite"] = r.get("nombre")
-                            logging.info(f"📄 Trámite detectado: {self.datos['nombre_tramite']}")
-                            break
-
                 if "agenda_sae_api_disponibilidades" in response.url:
                     data = response.json()
                     for bloque in data.get("disponibilidades", []):
@@ -197,7 +185,8 @@ class MECChecker:
         # Reset datos for each tramite
         self.datos = {
             "nombre_tramite": None,
-            "fechas": []
+            "fechas": [],
+            "etapa_id": etapa_id
         }
 
         self.page.goto(
@@ -206,9 +195,16 @@ class MECChecker:
             timeout=8000
         )
 
+        # Extraer nombre del trámite desde el DOM
+        try:
+            self.datos["nombre_tramite"] = self.page.locator(
+                "#main > div > div > div.span9.contenido-publico > h1"
+            ).inner_text(timeout=2000).strip()
+        except Exception:
+            logging.warning("No se pudo extraer el nombre del trámite desde el DOM")
+
         # Obtener la pregunta de seguridad
-        self.page.wait_for_selector("div.controls > input[type='text']~label", timeout=2000)
-        pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text()
+        pregunta = self.page.locator("div.controls > input[type='text']~label").inner_text(timeout=2000)
         logging.info(f"❓ Pregunta de seguridad: {pregunta}")
 
         # Integrar agente IA para responder la pregunta de seguridad
@@ -225,12 +221,11 @@ class MECChecker:
         return self.datos
 
     def process_results(self):
-        if not self.datos["fechas"]:
-            logging.info("❌ No hay cupos disponibles")
-            return
+        nombre_tramite = self.datos["nombre_tramite"] or "Trámite desconocido"
 
-        print(self.datos)
-        nombre_tramite = self.datos["nombre_tramite"] or "Inscripción de partidas extranjeras"
+        if not self.datos["fechas"]:
+            logging.info("❌ No hay cupos disponibles para trámite: " + nombre_tramite)
+            return
 
         self.datos["fechas"].sort()
         fecha = self.datos["fechas"][0]
