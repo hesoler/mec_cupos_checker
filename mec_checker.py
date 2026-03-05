@@ -9,6 +9,8 @@ from utils import cargar_estado, guardar_estado, get_mec_credentials, send_notif
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
+STORAGE_STATE_FILE = "storage_state.json"
+
 
 class MECChecker:
     def __init__(self, headless: bool = True):
@@ -34,8 +36,8 @@ class MECChecker:
         self.browser = self.playwright.chromium.launch(headless=self.headless)
 
         self.context = self.browser.new_context(
-            storage_state="storage_state.json"
-            if os.path.exists("storage_state.json")
+            storage_state=STORAGE_STATE_FILE
+            if os.path.exists(STORAGE_STATE_FILE)
             else None
         )
 
@@ -43,7 +45,7 @@ class MECChecker:
         self._setup_interceptors()
 
     def close(self):
-        self.context.storage_state(path="storage_state.json")
+        self.context.storage_state(path=STORAGE_STATE_FILE)
         self.browser.close()
         self.playwright.stop()
 
