@@ -191,9 +191,8 @@ class MECChecker:
             "etapa_id": etapa_id
         }
 
-        self.page.goto(
+        self._safe_goto(
             f"https://bpmgob.mec.gub.uy/etapas/ejecutar/{etapa_id}/0",
-            wait_until="networkidle",
             timeout=8000
         )
 
