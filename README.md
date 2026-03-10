@@ -200,9 +200,8 @@ mec_cupos_checker/
 ├── data/                      # Persistent data
 │   ├── available.json         # State file (auto-generated)
 │   └── storage_state.json     # Browser session (auto-generated)
-├── scripts/                   # Docker files
+├── scripts/                   # Scripts for Docker and cron
 │   ├── entrypoint.sh          # Sets up cron job
-
 ├── .env                       # Environment variables
 ├── Dockerfile                 # Docker image definition
 ├── docker-compose.yml         # Docker Compose configuration
