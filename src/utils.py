@@ -4,7 +4,7 @@ from pathlib import Path
 
 import notifier
 
-STATE_FILE = Path("available.json")
+STATE_FILE = Path("data/available.json")
 
 
 def cargar_estado():

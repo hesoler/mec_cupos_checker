@@ -6,5 +6,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./available.json:/app/available.json
-      - ./storage_state.json:/app/storage_state.json
+      - ./data/available.json:/app/data/available.json
+      - ./data/storage_state.json:/app/data/storage_state.json

@@ -69,9 +69,10 @@ pip install -r requirements.txt
 # Install Playwright browsers
 playwright install chromium
 
-# Create json files for state management
-echo "{}" > available.json
-echo "{}" > storage_state.json
+# Create data directory and state files
+mkdir -p data
+echo "{}" > data/available.json
+echo "{}" > data/storage_state.json
 ```
 
 ### Docker Deployment
@@ -133,7 +134,7 @@ CRON_JOB_TIMER_MINUTES=30
 
 ```bash
 # Ensure .env is configured
-python main.py
+python src/main.py
 ```
 
 ### Run with Docker (Scheduled Checks)
@@ -188,19 +189,26 @@ docker compose up --build
 
 ```
 mec_cupos_checker/
-├── main.py                 # Entry point
-├── mec_checker.py          # Main scraper logic
-├── ai_agent.py             # AI integration
-├── notifier.py             # Telegram notifications
-├── utils.py                # State management
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Container image definition
-├── docker-compose.yml      # Docker orchestration
-├── entrypoint.sh           # Container startup script
-├── mec_chain.pem           # SSL certificate chain
-├── README_CRON.md          # Cron documentation
-├── available.json          # State file (auto-generated)
-└── storage_state.json      # Browser session (auto-generated)
+├── src/                       # Source code
+│   ├── main.py                # Entry point
+│   ├── mec_checker.py         # Main scraper logic
+│   ├── ai_agent.py            # AI integration
+│   ├── notifier.py            # Telegram notifications
+│   └── utils.py               # State management
+├── config/                    # Configuration
+│   └── mec_chain.pem          # SSL certificate chain
+├── data/                      # Persistent data
+│   ├── available.json         # State file (auto-generated)
+│   └── storage_state.json     # Browser session (auto-generated)
+├── scripts/                   # Docker files
+│   ├── entrypoint.sh          # Sets up cron job
+
+├── .env                       # Environment variables
+├── Dockerfile                 # Docker image definition
+├── docker-compose.yml         # Docker Compose configuration
+├── requirements.txt           # Python dependencies
+├── README.md                  # Project documentation
+└── AGENTS.md                  # Development guidelines for AI agents
 ```
 
 ## Pending Improvements
@@ -263,13 +271,13 @@ mec_cupos_checker/
 ### Login fails repeatedly
 
 - Verify MEC_USER and MEC_PASSWORD are correct
-- Delete `storage_state.json` to force fresh login
+- Delete `data/storage_state.json` to force fresh login
 - Check if MEC website changed authentication flow
 
 ### No notifications received
 
 - Verify Telegram bot token and chat ID
-- Check if dates are actually new (check `available.json`)
+- Check if dates are actually new (check `data/available.json`)
 - Look for errors in logs: `docker exec mec_checker tail -f /var/log/mec_cupos_checker.log`
 
 ### AI agent fails to solve security question

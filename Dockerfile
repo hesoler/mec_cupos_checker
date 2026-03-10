@@ -26,18 +26,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY mec_chain.pem /app/mec_chain.pem
-
+COPY config/mec_chain.pem /app/mec_chain.pem
+COPY src/*.py /app/
 COPY requirements.txt .
 RUN sed -i 's/\r//' requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt \
     && playwright install chromium
 
-COPY . /app
+COPY scripts /app
 
 # Copiar entrypoint para manejar export de env y cron
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN sed -i 's/\r//' /usr/local/bin/entrypoint.sh

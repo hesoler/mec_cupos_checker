@@ -6,10 +6,11 @@ from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 from ai_agent import consultar_agente_ia_groq
 from utils import cargar_estado, guardar_estado, get_mec_credentials, send_notification_message
+from notifier import send_telegram
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
-STORAGE_STATE_FILE = "storage_state.json"
+STORAGE_STATE_FILE = "data/storage_state.json"
 
 
 class MECChecker:
