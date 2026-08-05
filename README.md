@@ -133,8 +133,14 @@ CRON_JOB_TIMER_MINUTES=30
 ### Run Locally (One-Time Check)
 
 ```bash
-# Ensure .env is configured
+# Ensure .env is configured and virtual environment is activated
+source venv/bin/activate
+
+# Run the checker
 python src/main.py
+
+# Or run directly using the virtualenv binary without activating:
+venv/bin/python src/main.py
 ```
 
 ### Run with Docker (Scheduled Checks)
