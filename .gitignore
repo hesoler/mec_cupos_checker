@@ -15,3 +15,5 @@ build/
 *.db
 *.iml
 .python-version
+.atl
+.venv
