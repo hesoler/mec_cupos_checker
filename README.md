@@ -104,6 +104,9 @@ TELEGRAM_CHATBOT_IDS=your_chat_id   # Comma-separated for multiple IDs
 # Groq AI API Key
 GROQ_API_KEY=your_groq_api_key
 
+# Groq agent model
+AGENT_MODEL=agent_model
+
 # Optional: Disable cron (run once and exit)
 CRON_DISABLED=true
 
