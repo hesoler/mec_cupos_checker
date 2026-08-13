@@ -1,7 +1,8 @@
 from groq import Groq
 import logging
 
-def consultar_agente_ia_groq(pregunta: str) -> str:
+
+def consultar_agente_ia_groq(pregunta: str, agent_model) -> str:
     try:
         client = Groq()
         chat_completion = client.chat.completions.create(
@@ -19,7 +20,7 @@ def consultar_agente_ia_groq(pregunta: str) -> str:
             temperature=0.7,
 
             # The language model which will generate the completion.
-            model="llama-3.3-70b-versatile"
+            model=agent_model
         )
         return chat_completion.choices[0].message.content
     except Exception as e:

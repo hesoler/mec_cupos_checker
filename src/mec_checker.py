@@ -5,7 +5,7 @@ import time
 from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 from ai_agent import consultar_agente_ia_groq
-from utils import cargar_estado, guardar_estado, get_mec_credentials, send_notification_message
+from utils import cargar_estado, guardar_estado, get_mec_credentials, send_notification_message, get_agent_model
 from notifier import send_telegram
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -208,7 +208,8 @@ class MECChecker:
         logging.info(f"❓ Pregunta de seguridad: {pregunta}")
 
         # Integrar agente IA para responder la pregunta de seguridad
-        agent_response = consultar_agente_ia_groq(pregunta)
+        agent_model = get_agent_model()
+        agent_response = consultar_agente_ia_groq(pregunta, agent_model)
         logging.info(f"🤖 Respuesta del agente: {agent_response}")
 
         self.page.fill("div.controls > input[name='pregunta']", agent_response)

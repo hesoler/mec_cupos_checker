@@ -29,7 +29,8 @@ def guardar_estado(data):
 def validate_env_vars():
     required_vars = [
         "MEC_USER", "MEC_PASSWORD", "ETAPAS_IDS",
-        "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHATBOT_IDS", "GROQ_API_KEY"
+        "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHATBOT_IDS", 
+        "GROQ_API_KEY", "AGENT_MODEL"
     ]
     missing = [var for var in required_vars if not os.getenv(var)]
     if missing:
@@ -75,3 +76,7 @@ def send_notification_message(message):
             chat_id,
             message
         )
+
+
+def get_agent_model():
+    return str(os.getenv("AGENT_MODEL"))
